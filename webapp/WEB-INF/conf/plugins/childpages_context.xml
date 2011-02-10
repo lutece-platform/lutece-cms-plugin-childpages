@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+    
+   <!-- package childpages -->
+  <bean id="childPagesPortletDAO"  class="fr.paris.lutece.plugins.childpages.business.portlet.ChildPagesPortletDAO" />  
+  
+</beans>
