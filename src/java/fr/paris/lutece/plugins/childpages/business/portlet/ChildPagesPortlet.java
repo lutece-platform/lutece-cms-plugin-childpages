@@ -112,28 +112,31 @@ public class ChildPagesPortlet extends Portlet
         {
             Page page = (Page) i.next(  );
 
-            if ( page.isVisible( request ) )
+            if ( request != null )
             {
-                XmlUtil.beginElement( strXml, TAG_CHILD_PAGE );
-                XmlUtil.addElement( strXml, TAG_CHILD_PAGE_ID, page.getId(  ) );
-                XmlUtil.addElement( strXml, TAG_CHILD_PAGE_NAME, page.getName(  ) );
-                XmlUtil.addElement( strXml, TAG_CHILD_PAGE_DESCRIPTION, page.getDescription(  ) );
-
-                AdminPageJspBean adminPage = new AdminPageJspBean(  );
-
-                if ( page.getImageContent(  ) != null )
-                {
-                    int nImageLength = page.getImageContent(  ).length;
-
-                    if ( nImageLength >= 1 )
-                    {
-                        String strPageId = new Integer( page.getId(  ) ).toString(  );
-                        XmlUtil.addElement( strXml, TAG_CHILD_PAGE_IMAGE,
-                            adminPage.getResourceImagePage( page, strPageId ) );
-                    }
-                }
-
-                XmlUtil.endElement( strXml, TAG_CHILD_PAGE );
+	            if ( page.isVisible( request ) )
+	            {
+	                XmlUtil.beginElement( strXml, TAG_CHILD_PAGE );
+	                XmlUtil.addElement( strXml, TAG_CHILD_PAGE_ID, page.getId(  ) );
+	                XmlUtil.addElement( strXml, TAG_CHILD_PAGE_NAME, page.getName(  ) );
+	                XmlUtil.addElement( strXml, TAG_CHILD_PAGE_DESCRIPTION, page.getDescription(  ) );
+	
+	                AdminPageJspBean adminPage = new AdminPageJspBean(  );
+	
+	                if ( page.getImageContent(  ) != null )
+	                {
+	                    int nImageLength = page.getImageContent(  ).length;
+	
+	                    if ( nImageLength >= 1 )
+	                    {
+	                        String strPageId = new Integer( page.getId(  ) ).toString(  );
+	                        XmlUtil.addElement( strXml, TAG_CHILD_PAGE_IMAGE,
+	                            adminPage.getResourceImagePage( page, strPageId ) );
+	                    }
+	                }
+	
+	                XmlUtil.endElement( strXml, TAG_CHILD_PAGE );
+	            }
             }
         }
 
