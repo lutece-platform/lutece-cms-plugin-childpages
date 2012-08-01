@@ -5,7 +5,14 @@
 	<xsl:param name="site-path" select="site-path" />
 
 	<xsl:template match="portlet">
-		<div class="portlet append-bottom -lutece-border-radius">
+	<xsl:variable name="device_class">
+	<xsl:choose>
+		<xsl:when test="string(display-on-small-device)='0'">hide-for-small</xsl:when>
+		<xsl:otherwise></xsl:otherwise>
+	</xsl:choose>
+	</xsl:variable>
+
+		<div class="portlet  {$device_class} append-bottom -lutece-border-radius">
 			<h2>
 				<xsl:if test="not(string(display-portlet-title)='1')">
 					<xsl:value-of disable-output-escaping="yes" select="portlet-name" />
