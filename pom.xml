@@ -37,8 +37,8 @@
 		<jiraComponentId>10170</jiraComponentId>
 	</properties>
     <scm>
-        <connection>scm:svn:http://dev.lutece.paris.fr/svn/lutece/portal/trunk/plugins/cms/plugin-childpages</connection>
-        <developerConnection>scm:svn:https://dev.lutece.paris.fr/svn/lutece/portal/trunk/plugins/cms/plugin-childpages</developerConnection>
-        <url>http://dev.lutece.paris.fr/viewvc/lutece/portal/trunk/plugins/cms/plugin-childpages</url>
+        <connection>scm:git:https://github.com/lutece-platform/lutece-cms-plugin-childpages.git</connection>
+        <developerConnection>scm:git:https://github.com/lutece-platform/lutece-cms-plugin-childpages.git</developerConnection>
+        <url>https://github.com/lutece-platform/lutece-cms-plugin-childpages.git</url>
     </scm>
 </project>
