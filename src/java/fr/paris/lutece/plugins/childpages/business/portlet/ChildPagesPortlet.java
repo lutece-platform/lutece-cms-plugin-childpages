@@ -39,7 +39,7 @@ import fr.paris.lutece.portal.business.portlet.Portlet;
 import fr.paris.lutece.portal.web.admin.AdminPageJspBean;
 import fr.paris.lutece.util.xml.XmlUtil;
 
-import java.util.Iterator;
+import java.util.Collection;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -101,17 +101,18 @@ public class ChildPagesPortlet extends Portlet
         StringBuffer strXml = new StringBuffer(  );
         XmlUtil.beginElement( strXml, TAG_CHILD_PAGES_PORTLET_LIST );
 
-        Iterator i = PageHome.getChildPages( getPageId(  ) ).iterator(  );
-
-        if ( getParentPageId(  ) != 0 )
+        Collection<Page> pages;
+        if ( getParentPageId(  ) == 0 )
         {
-            i = PageHome.getChildPages( getParentPageId(  ) ).iterator(  );
+            pages = PageHome.getChildPages( getPageId(  ) );
+        } else
+        {
+            pages = PageHome.getChildPages( getParentPageId(  ) );
         }
 
-        while ( i.hasNext(  ) )
+        AdminPageJspBean adminPage = new AdminPageJspBean(  );
+        for ( Page page : pages )
         {
-            Page page = (Page) i.next(  );
-
             if ( request != null )
             {
 	            if ( page.isVisible( request ) )
@@ -120,9 +121,7 @@ public class ChildPagesPortlet extends Portlet
 	                XmlUtil.addElement( strXml, TAG_CHILD_PAGE_ID, page.getId(  ) );
 	                XmlUtil.addElement( strXml, TAG_CHILD_PAGE_NAME, page.getName(  ) );
 	                XmlUtil.addElement( strXml, TAG_CHILD_PAGE_DESCRIPTION, page.getDescription(  ) );
-	
-	                AdminPageJspBean adminPage = new AdminPageJspBean(  );
-	
+
 	                if ( page.getImageContent(  ) != null )
 	                {
 	                    int nImageLength = page.getImageContent(  ).length;
