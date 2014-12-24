@@ -33,6 +33,9 @@
  */
 package fr.paris.lutece.plugins.childpages.business.portlet;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import fr.paris.lutece.portal.business.portlet.Portlet;
 import fr.paris.lutece.util.ReferenceList;
 import fr.paris.lutece.util.sql.DAOUtil;
@@ -49,6 +52,7 @@ public final class ChildPagesPortletDAO implements IChildPagesPortletDAO
     private static final String SQL_QUERY_UPDATE = "UPDATE childpages_portlet SET id_child_page = ? WHERE id_portlet = ?";
     private static final String SQL_QUERY_SELECT_CHILDPAGE_LIST = "SELECT id_page, name FROM core_page WHERE id_page = ?";
     private static final String SQL_QUERY_SELECT_PAGE_LIST = "SELECT id_page, name FROM core_page";
+    private static final String SQL_QUERY_SELECT_BY_PARENTPAGEID = "SELECT id_portlet, id_child_page FROM childpages_portlet WHERE id_child_page = ?";
 
     ////////////////////////////////////////////////////////////////////////////
     //Access methods to data
@@ -164,5 +168,27 @@ public final class ChildPagesPortletDAO implements IChildPagesPortletDAO
         daoUtil.free(  );
 
         return list;
+    }
+
+    @Override
+    public List<ChildPagesPortlet> getChildPagesPortlets( int parentPageId )
+    {
+        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_BY_PARENTPAGEID );
+        daoUtil.setInt( 1, parentPageId );
+        daoUtil.executeQuery(  );
+
+        List<ChildPagesPortlet> res = new ArrayList<ChildPagesPortlet>( );
+
+        while ( daoUtil.next(  ) )
+        {
+            ChildPagesPortlet portlet = new ChildPagesPortlet(  );
+            portlet.setId( daoUtil.getInt( 1 ) );
+            portlet.setParentPageId( daoUtil.getInt( 2 ) );
+            res.add( portlet );
+        }
+
+        daoUtil.free(  );
+
+        return res;
     }
 }

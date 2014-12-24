@@ -4,6 +4,7 @@
 <beans>
     
    <!-- package childpages -->
-  <bean id="childPagesPortletDAO"  class="fr.paris.lutece.plugins.childpages.business.portlet.ChildPagesPortletDAO" />  
+  <bean id="childPagesPortletDAO"  class="fr.paris.lutece.plugins.childpages.business.portlet.ChildPagesPortletDAO" />
+  <bean id="childPagesEventListener" class="fr.paris.lutece.plugins.childpages.business.portlet.EventListener" />
   
 </beans>
