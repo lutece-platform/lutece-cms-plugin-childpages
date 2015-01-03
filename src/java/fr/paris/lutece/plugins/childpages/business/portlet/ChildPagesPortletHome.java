@@ -33,6 +33,9 @@
  */
 package fr.paris.lutece.plugins.childpages.business.portlet;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import fr.paris.lutece.portal.business.portlet.IPortletInterfaceDAO;
 import fr.paris.lutece.portal.business.portlet.PortletHome;
 import fr.paris.lutece.portal.business.portlet.PortletTypeHome;
@@ -133,5 +136,22 @@ public class ChildPagesPortletHome extends PortletHome
     public static ReferenceList getChildPagesList( int nPageId )
     {
         return _dao.selectChildPagesList( nPageId );
+    }
+    
+    /**
+     * Returns the list of ChildPages portlets whose parent page id is specified
+     * 
+     * @param parentPageId the parent page id
+     * @return list of ChildPages portlets whose parent page id is parentPageId
+     */
+    public static List<ChildPagesPortlet> getChildPagesPortlets( int parentPageId )
+    {
+        List<ChildPagesPortlet> portlets = _dao.getChildPagesPortlets( parentPageId );
+        List<ChildPagesPortlet> res = new ArrayList<ChildPagesPortlet>( portlets.size( ) );
+        for ( ChildPagesPortlet aPortlet : portlets)
+        {
+            res.add( ( ChildPagesPortlet ) findByPrimaryKey( aPortlet.getId( ) ) );
+        }
+        return res;
     }
 }

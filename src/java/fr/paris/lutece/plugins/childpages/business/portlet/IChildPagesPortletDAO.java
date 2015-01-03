@@ -33,6 +33,8 @@
  */
 package fr.paris.lutece.plugins.childpages.business.portlet;
 
+import java.util.List;
+
 import fr.paris.lutece.portal.business.portlet.IPortletInterfaceDAO;
 import fr.paris.lutece.portal.business.portlet.Portlet;
 import fr.paris.lutece.util.ReferenceList;
@@ -92,4 +94,12 @@ public interface IChildPagesPortletDAO extends IPortletInterfaceDAO
      * @param portlet the instance of Portlet class to be updated
      */
     public abstract void store( Portlet portlet );
+
+    /**
+     * Returns the list of ChildPages portlets whose parent page id is specified
+     * 
+     * @param parentPageId the parent page id
+     * @return list of ChildPages portlets whose parent page id is parentPageId
+     */
+    public List<ChildPagesPortlet> getChildPagesPortlets( int parentPageId );
 }
