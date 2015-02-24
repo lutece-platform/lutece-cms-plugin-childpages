@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document>
-	<properties>
-		<title>Plugin</title>
-	</properties>
-	<body>
-		<section name="Plugin">
-			<subsection name="Introduction">
-			</subsection>
-		</section>
-	</body>
+    <properties>
+        <title>Plugin Child Pages</title>
+    </properties>
+    <body>
+        <section name="Plugin Child Pages">
+            <subsection name="Introduction">
+                <p>
+                    Ce plugin fournit une rubrique (portlet) affichant des liens
+                    (automatiques ou manuels) vers les pages filles de la page courante
+                    (ou d'une page désignée par son ID).
+                </p>
+            </subsection>
+        </section>
+    </body>
 </document>
