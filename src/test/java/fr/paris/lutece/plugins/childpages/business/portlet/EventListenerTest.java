@@ -294,7 +294,7 @@ public class EventListenerTest extends LuteceTestCase
     private static final String PORLET_NAME = "ChildPagesPortletTest";
 
     @Before
-    public void createPortlet( ) throws Exception
+    public void setUp( ) throws Exception
     {
         super.setUp( );
         ChildPagesPortlet portlet = new ChildPagesPortlet( );
@@ -314,7 +314,7 @@ public class EventListenerTest extends LuteceTestCase
     }
 
     @After
-    public void destroyPortlet( ) throws Exception
+    public void tearDown( ) throws Exception
     {
         ChildPagesPortlet portlet = findTestPortlet( );
         if ( portlet != null )

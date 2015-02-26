@@ -33,6 +33,7 @@
  */
 package fr.paris.lutece.plugins.childpages.business.portlet;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import fr.paris.lutece.portal.business.page.Page;
@@ -93,26 +94,35 @@ public class EventListener implements PageEventListener
                 // we reached the root
                 return;
             }
-            // invalidate portlets with the default parent page
-            Page parentPage = PageHome.findByPrimaryKey( parentPageId );
-            List<Portlet> portlets = parentPage.getPortlets( );
-            String childPagesPortletId = ChildPagesPortletHome.getInstance( ).getPortletTypeId( );
-            for ( Portlet aPortlet : portlets )
+            List<Integer> parentPageIds = new ArrayList<Integer>( 2 );
+            parentPageIds.add( parentPageId );
+            if ( parentPageId != event.getPage( ).getOrigParentPageId( ) )
             {
-                if ( aPortlet.getPortletTypeId( ).equals( childPagesPortletId ) )
+                parentPageIds.add( event.getPage( ).getOrigParentPageId( ) );
+            }
+            for ( Integer pageId : parentPageIds )
+            {
+                // invalidate portlets with the default parent page
+                Page parentPage = PageHome.findByPrimaryKey( pageId );
+                List<Portlet> portlets = parentPage.getPortlets( );
+                String childPagesPortletId = ChildPagesPortletHome.getInstance( ).getPortletTypeId( );
+                for ( Portlet aPortlet : portlets )
                 {
-                    ChildPagesPortlet cpPortlet = ( ChildPagesPortlet ) aPortlet;
-                    if ( cpPortlet.getParentPageId( ) == 0 )
+                    if ( aPortlet.getPortletTypeId( ).equals( childPagesPortletId ) )
                     {
-                        PortletHome.invalidate( aPortlet );
+                        ChildPagesPortlet cpPortlet = ( ChildPagesPortlet ) aPortlet;
+                        if ( cpPortlet.getParentPageId( ) == 0 )
+                        {
+                            PortletHome.invalidate( aPortlet );
+                        }
                     }
                 }
-            }
-            // invalidate portlets with custom parent page 
-            List<ChildPagesPortlet> childPagesportlets = ChildPagesPortletHome.getChildPagesPortlets( parentPageId );
-            for ( ChildPagesPortlet aPortlet : childPagesportlets )
-            {
-                PortletHome.invalidate( aPortlet );
+                // invalidate portlets with custom parent page
+                List<ChildPagesPortlet> childPagesportlets = ChildPagesPortletHome.getChildPagesPortlets( pageId );
+                for ( ChildPagesPortlet aPortlet : childPagesportlets )
+                {
+                    PortletHome.invalidate( aPortlet );
+                }
             }
         } finally
         {
