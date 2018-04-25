@@ -10,7 +10,7 @@
     <groupId>fr.paris.lutece.plugins</groupId>
     <artifactId>plugin-childpages</artifactId>
     <packaging>lutece-plugin</packaging>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>4.1.1</version>
     <name>Lutece childpages plugin</name>
 
     <repositories>
@@ -41,7 +41,7 @@
         <connection>scm:git:https://github.com/lutece-platform/lutece-cms-plugin-childpages.git</connection>
         <developerConnection>scm:git:https://github.com/lutece-platform/lutece-cms-plugin-childpages.git</developerConnection>
         <url>https://github.com/lutece-platform/lutece-cms-plugin-childpages.git</url>
-      <tag>HEAD</tag>
+      <tag>plugin-childpages-4.1.1</tag>
   </scm>
     
 </project>
