@@ -1,7 +1,8 @@
-<div class="form-group">
-	<label> #i18n{childpages.value_id_parent.label} : *</label>
-		<input type="text" class="form-control input-sm" name="parent_id" value="${page_id_parent}" class="input-sm">
-		<span class="help-block">#i18n{childpages.help_message.label}</span>
-		<span class="help-block">#i18n{childpages.help_message.example}</span>
-</div>
+<#assign helpKey>
+	#i18n{childpages.help_message.label}<br />
+	#i18n{childpages.help_message.example}
+</#assign>
+<@formGroup labelFor='parent_id' labelKey='#i18n{childpages.value_id_parent.label}' helpKey=helpKey mandatory=true>
+	<@input type='text' name='parent_id' id='parent_id' value='${page_id_parent}' />
+</@formGroup>
    
