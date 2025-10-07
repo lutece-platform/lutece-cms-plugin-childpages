@@ -1,3 +1,6 @@
+-- liquibase formatted sql
+-- changeset childpages:update_db_core_childpages-2.0.13-2.0.13.sql
+-- preconditions onFail:MARK_RAN onError:WARN
 
 --
 -- Dumping data for table `core_style`
