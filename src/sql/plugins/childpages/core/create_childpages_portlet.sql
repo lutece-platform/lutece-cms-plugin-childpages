@@ -1,3 +1,6 @@
+-- liquibase formatted sql
+-- changeset childpages:create_childpages_portlet.sql
+-- preconditions onFail:MARK_RAN onError:WARN
 --
 -- Structure for table childpages_portlet
 --
