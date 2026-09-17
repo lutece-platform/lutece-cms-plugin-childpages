@@ -36,106 +36,139 @@ package fr.paris.lutece.plugins.childpages.web.portlet;
 import fr.paris.lutece.plugins.childpages.business.portlet.ChildPagesPortlet;
 import fr.paris.lutece.plugins.childpages.business.portlet.ChildPagesPortletHome;
 import fr.paris.lutece.portal.business.page.PageHome;
+import fr.paris.lutece.portal.business.portlet.Portlet;
 import fr.paris.lutece.portal.business.portlet.PortletHome;
+import fr.paris.lutece.portal.business.portlet.PortletTypeHome;
 import fr.paris.lutece.portal.service.message.AdminMessage;
 import fr.paris.lutece.portal.service.message.AdminMessageService;
+import fr.paris.lutece.portal.service.security.SecurityTokenService;
+import fr.paris.lutece.portal.service.i18n.I18nService;
+import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.template.AppTemplateService;
-import fr.paris.lutece.portal.service.util.AppException;
 import fr.paris.lutece.portal.web.constants.Messages;
 import fr.paris.lutece.portal.web.portlet.PortletJspBean;
 import fr.paris.lutece.util.html.HtmlTemplate;
 
 import java.util.HashMap;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Named;
+import org.apache.commons.lang3.StringUtils;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 
 /**
  * This class provides the user interface to manage ChildPages Portlet
  */
+@RequestScoped
+@Named
 public class ChildPagesPortletJspBean extends PortletJspBean
 {
-    ////////////////////////////////////////////////////////////////////////////
-    // Constants
-
-    // Right
+    private static final String MESSAGE_PORTLET_TYPE_NOT_FOUND = "childpages.message.portletTypeNotFound";
+    private static final String MESSAGE_PORTLET_NOT_FOUND = "childpages.message.portletNotFound";
+    private static final String MESSAGE_INVALID_TOKEN = "childpages.message.invalidToken";
+    private static final String ACTION_CREATE_PORTLET = "childpages.createPortlet";
+    private static final String ACTION_MODIFY_PORTLET = "childpages.modifyPortlet";
     public static final String RIGHT_MANAGE_ADMIN_SITE = "CORE_ADMIN_SITE";
 
-    // Messages
     private static final String MESSAGE_PORTLET_CHILD_PAGE_INEXISTENT = "childpages.message.portlet.childpageInexistent";
     private static final String MESSAGE_PORTLET_CHILD_PAGE_PARENT_NOT_VALID = "childpages.message.portlet.childpageParentNotValid";
 
-    // Templates
-    private static final String TEMPLATE_HELP_PARENT_PAGE = "admin/plugins/childpages/help_parent_page.html";
 
-    // Parameters
     private static final String PARAMETER_PARENT_ID = "parent_id";
 
-    // Bookmarks
     private static final String MARK_PARENT_ID = "page_id_parent";
 
     /**
-     * Returns portlet's properties prefix
+     * Returns the portlet properties prefix
      *
-     * @return prefix
+     * @return the properties prefix
      */
-    public String getPropertiesPrefix(  )
+    public String getPropertiesPrefix( )
     {
         return "portlet.child.pages";
     }
 
     /**
-     * Returns the Download portlet creation form
+     * Returns the portlet creation form
      *
-     * @param request The http request
-     * @return The HTML form
+     * @param request the HTTP request
+     * @return the creation form
      */
     public String getCreate( HttpServletRequest request )
     {
+        String strPortletTypeId = request.getParameter( PARAMETER_PORTLET_TYPE_ID );
+
+        if ( StringUtils.isEmpty( strPortletTypeId ) || PortletTypeHome.findByPrimaryKey( strPortletTypeId ) == null
+                || PortletTypeHome.findByPrimaryKey( strPortletTypeId ).getDoCreateUrl( ) == null )
+        {
+            return I18nService.getLocalizedString( MESSAGE_PORTLET_TYPE_NOT_FOUND, getLocale( ) );
+        }
+
         String strIdPage = request.getParameter( PARAMETER_PAGE_ID );
         String strIdPortletType = request.getParameter( PARAMETER_PORTLET_TYPE_ID );
-        HashMap model = new HashMap(  );
+        HashMap<String, Object> model = new HashMap<>( );
         model.put( MARK_PARENT_ID, strIdPage );
+        model.put( SecurityTokenService.MARK_TOKEN, getSecurityTokenService( ).getToken( request, ACTION_CREATE_PORTLET ) );
 
         HtmlTemplate template = getCreateTemplate( strIdPage, strIdPortletType, model );
 
-        return template.getHtml(  );
-    }
-
-    public String getModify( HttpServletRequest request )
-    {
-        String strIdPortlet = request.getParameter( PARAMETER_PORTLET_ID );
-        int nIdPortlet = Integer.parseInt( strIdPortlet );
-        ChildPagesPortlet portlet = (ChildPagesPortlet) PortletHome.findByPrimaryKey( nIdPortlet );
-
-        //initialization of nParentPageId
-        int nIdParentPage = portlet.getParentPageId(  );
-
-        HashMap model = new HashMap(  );
-        model.put( MARK_PARENT_ID, nIdParentPage );
-
-        HtmlTemplate template = getModifyTemplate( portlet, model );
-
-        return template.getHtml(  );
+        return template.getHtml( );
     }
 
     /**
-     * Process portlet's creation
+     * Returns the portlet modification form
      *
-     * @param request The Http request
-     * @return The Jsp management URL of the process result
+     * @param request the HTTP request
+     * @return the modification form
+     */
+    public String getModify( HttpServletRequest request )
+    {
+        ChildPagesPortlet portlet = findPortlet( request );
+
+        if ( portlet == null )
+        {
+            return I18nService.getLocalizedString( MESSAGE_PORTLET_NOT_FOUND, getLocale( ) );
+        }
+
+        int nIdParentPage = portlet.getParentPageId( );
+
+        HashMap<String, Object> model = new HashMap<>( );
+        model.put( MARK_PARENT_ID, nIdParentPage );
+        model.put( SecurityTokenService.MARK_TOKEN, getSecurityTokenService( ).getToken( request, ACTION_MODIFY_PORTLET ) );
+
+        HtmlTemplate template = getModifyTemplate( portlet, model );
+
+        return template.getHtml( );
+    }
+
+    /**
+     * Processes portlet creation
+     *
+     * @param request the HTTP request
+     * @return the result management URL
      */
     public String doCreate( HttpServletRequest request )
     {
-        ChildPagesPortlet portlet = new ChildPagesPortlet(  );
+        if ( !getSecurityTokenService( ).validate( request, ACTION_CREATE_PORTLET ) )
+        {
+            return AdminMessageService.getMessageUrl( request, MESSAGE_INVALID_TOKEN, AdminMessage.TYPE_STOP );
+        }
+
         String strIdPage = request.getParameter( PARAMETER_PAGE_ID );
+
+        if ( StringUtils.isEmpty( strIdPage ) || !StringUtils.isNumeric( strIdPage ) )
+        {
+            return AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP );
+        }
+
+        ChildPagesPortlet portlet = new ChildPagesPortlet( );
         int nIdPage = Integer.parseInt( strIdPage );
 
-        //gets the identifier of the parent page
         String strParentPage = request.getParameter( PARAMETER_PARENT_ID );
 
-        //Mandatory fields
-        if ( strParentPage.trim(  ).equals( "" ) || ( strParentPage == null ) )
+        if ( ( strParentPage == null ) || strParentPage.trim( ).equals( "" ) )
         {
             return AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP );
         }
@@ -146,25 +179,18 @@ public class ChildPagesPortletJspBean extends PortletJspBean
         {
             nIdParentPage = Integer.parseInt( strParentPage );
         }
-        catch ( NumberFormatException nb )
+        catch( NumberFormatException e )
         {
-            //the format of the identifier of the page is not valid
             return AdminMessageService.getMessageUrl( request, MESSAGE_PORTLET_CHILD_PAGE_PARENT_NOT_VALID,
                 AdminMessage.TYPE_STOP );
         }
 
-        try
+        if ( !PageHome.checkPageExist( nIdParentPage ) )
         {
-            PageHome.getPage( nIdParentPage );
-        }
-        catch ( AppException ex )
-        {
-            //The exception is thrown if the page doesn't exist
             return AdminMessageService.getMessageUrl( request, MESSAGE_PORTLET_CHILD_PAGE_INEXISTENT,
                 AdminMessage.TYPE_STOP );
         }
 
-        // get portlet common attributes
         String strErrorUrl = setPortletCommonData( request, portlet );
 
         if ( strErrorUrl != null )
@@ -174,30 +200,33 @@ public class ChildPagesPortletJspBean extends PortletJspBean
 
         portlet.setPageId( nIdPage );
 
-        //gets the specific parameters
         portlet.setParentPageId( nIdParentPage );
 
-        //Portlet creation
-        ChildPagesPortletHome.getInstance(  ).create( portlet );
+        ChildPagesPortletHome.getInstance( ).create( portlet );
 
-        //Displays the page with the new Portlet
         return getPageUrl( nIdPage );
     }
 
     /**
-     * Process portlet's modification
+     * Processes portlet modification
      *
-     * @param request The http request
-     * @return Management's Url
+     * @param request the HTTP request
+     * @return the result management URL
      */
     public String doModify( HttpServletRequest request )
     {
-        //recovery of the portlet
-        String strIdPortlet = request.getParameter( PARAMETER_PORTLET_ID );
-        int nIdPortlet = Integer.parseInt( strIdPortlet );
-        ChildPagesPortlet portlet = (ChildPagesPortlet) PortletHome.findByPrimaryKey( nIdPortlet );
+        if ( !getSecurityTokenService( ).validate( request, ACTION_MODIFY_PORTLET ) )
+        {
+            return AdminMessageService.getMessageUrl( request, MESSAGE_INVALID_TOKEN, AdminMessage.TYPE_STOP );
+        }
 
-        // get portlet common attributes
+        ChildPagesPortlet portlet = findPortlet( request );
+
+        if ( portlet == null )
+        {
+            return AdminMessageService.getMessageUrl( request, MESSAGE_PORTLET_NOT_FOUND, AdminMessage.TYPE_STOP );
+        }
+
         String strErrorUrl = setPortletCommonData( request, portlet );
 
         if ( strErrorUrl != null )
@@ -205,10 +234,9 @@ public class ChildPagesPortletJspBean extends PortletJspBean
             return strErrorUrl;
         }
 
-        //recovery of the identifier of the parent page
         String strParentPage = request.getParameter( PARAMETER_PARENT_ID );
 
-        if ( strParentPage.trim(  ).equals( "" ) || ( strParentPage == null ) )
+        if ( ( strParentPage == null ) || strParentPage.trim( ).equals( "" ) )
         {
             return AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP );
         }
@@ -219,43 +247,55 @@ public class ChildPagesPortletJspBean extends PortletJspBean
         {
             nIdPageMere = Integer.parseInt( strParentPage );
         }
-        catch ( NumberFormatException nb )
+        catch( NumberFormatException e )
         {
-            //the format of the identifier of the page is not valid
             return AdminMessageService.getMessageUrl( request, MESSAGE_PORTLET_CHILD_PAGE_PARENT_NOT_VALID,
                 AdminMessage.TYPE_STOP );
         }
 
-        try
+        if ( !PageHome.checkPageExist( nIdPageMere ) )
         {
-            PageHome.getPage( nIdPageMere );
-        }
-        catch ( AppException ex )
-        {
-            //The exception is thrown if the page doesn't exist
             return AdminMessageService.getMessageUrl( request, MESSAGE_PORTLET_CHILD_PAGE_INEXISTENT,
                 AdminMessage.TYPE_STOP );
         }
 
-        //gets the specific attributes of the portlet
         portlet.setParentPageId( nIdPageMere );
 
-        //Update of the portlet
-        portlet.update(  );
+        portlet.update( );
 
-        //Displays the page with the updated portlet
-        return getPageUrl( portlet.getPageId(  ) );
+        return getPageUrl( portlet.getPageId( ) );
     }
 
     /**
-     * displays the form to help the parent page input of the child page portlet
+     * Finds the portlet named by the request, without throwing on a bad identifier.
      *
-     * @return the html code to help
+     * PortletHome.findByPrimaryKey of the core dereferences the row it loaded without checking it exists, so an
+     * unknown identifier raises a NullPointerException there rather than returning null.
+     *
+     * @param request the HTTP request
+     * @return the portlet, null when the identifier is missing, malformed or unknown
      */
-    public String getHelpParentPage( HttpServletRequest request )
+    private ChildPagesPortlet findPortlet( HttpServletRequest request )
     {
-        HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_HELP_PARENT_PAGE );
+        String strIdPortlet = request.getParameter( PARAMETER_PORTLET_ID );
 
-        return template.getHtml(  );
+        if ( StringUtils.isEmpty( strIdPortlet ) || !StringUtils.isNumeric( strIdPortlet ) )
+        {
+            return null;
+        }
+
+        Portlet portlet;
+
+        try
+        {
+            portlet = PortletHome.findByPrimaryKey( Integer.parseInt( strIdPortlet ) );
+        }
+        catch( NullPointerException e )
+        {
+            AppLogService.info( "Unknown portlet {}", strIdPortlet );
+            return null;
+        }
+
+        return portlet instanceof ChildPagesPortlet ? (ChildPagesPortlet) portlet : null;
     }
 }

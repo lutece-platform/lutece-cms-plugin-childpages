@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2026, City of Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,45 +35,45 @@ package fr.paris.lutece.plugins.childpages.business.portlet;
 
 import fr.paris.lutece.portal.business.page.Page;
 import fr.paris.lutece.portal.business.page.PageHome;
-import fr.paris.lutece.portal.business.portlet.Portlet;
+import fr.paris.lutece.portal.business.portlet.PortletHtmlContent;
+import fr.paris.lutece.portal.service.template.AppTemplateService;
+import fr.paris.lutece.portal.service.util.AppPathService;
 import fr.paris.lutece.portal.web.admin.AdminPageJspBean;
-import fr.paris.lutece.util.xml.XmlUtil;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * This class represents business objects ChildPagesPortlet
  */
-public class ChildPagesPortlet extends Portlet
+public class ChildPagesPortlet extends PortletHtmlContent
 {
-    /////////////////////////////////////////////////////////////////////////////////
-    // Xml Tags
-    public static final String TAG_CHILD_PAGE = "child-page";
-    public static final String TAG_CHILD_PAGE_ID = "child-page-id";
-    public static final String TAG_CHILD_PAGE_NAME = "child-page-name";
-    public static final String TAG_CHILD_PAGE_DESCRIPTION = "child-page-description";
-    public static final String TAG_CHILD_PAGE_IMAGE = "child-page-image";
-    public static final String TAG_CHILD_PAGES_PORTLET_LIST = "child-pages-portlet";
+    private static final String TEMPLATE_PORTLET = "skin/plugins/childpages/portlet/childpages_portlet.html";
+    private static final String MARK_PORTLET = "portlet";
+    private static final String MARK_CHILD_PAGES = "child_pages";
+    private static final String MARK_SITE_PATH = "site_path";
+    private static final String MARK_DEVICE_CLASS = "device_class";
+    private static final String CLASS_HIDDEN_PHONE = "hidden-phone";
 
-    /////////////////////////////////////////////////////////////////////////////////
-    // Constants
     private int _nParentPageId;
 
     /**
-     * Sets the identifier of the portlet type to the value specified in the ChildPagesPortletHome class
+     * Builds a portlet with its type identifier
      */
-    public ChildPagesPortlet(  )
+    public ChildPagesPortlet( )
     {
-        setPortletTypeId( ChildPagesPortletHome.getInstance(  ).getPortletTypeId(  ) );
+        setPortletTypeId( ChildPagesPortletHome.getInstance( ).getPortletTypeId( ) );
     }
 
     /**
-     * Sets the parent page identifier of the portlet to the value specified in parameter
+     * Sets the parent page identifier
      *
-     * @param nParentPageId new parent page identifier
+     * @param nParentPageId the parent page identifier
      */
     public void setParentPageId( int nParentPageId )
     {
@@ -81,93 +81,148 @@ public class ChildPagesPortlet extends Portlet
     }
 
     /**
-     * Returns the identifier of the parent page of the portlet
+     * Returns the parent page identifier
      *
      * @return the parent page identifier
      */
-    public int getParentPageId(  )
+    public int getParentPageId( )
     {
         return _nParentPageId;
     }
 
     /**
-     * Returns the Xml code of the Child pages portlet without XML heading
+     * Returns the HTML content of the portlet
      *
-     * @param request The HTTP Servlet Request
-     * @return the Xml code of the child pages portlet content
+     * @param request the HTTP request
+     * @return the rendered portlet
      */
-    public String getXml( HttpServletRequest request )
+    @Override
+    public String getHtmlContent( HttpServletRequest request )
     {
-        StringBuffer strXml = new StringBuffer(  );
-        XmlUtil.beginElement( strXml, TAG_CHILD_PAGES_PORTLET_LIST );
+        Map<String, Object> model = new HashMap<>( );
+        model.put( MARK_PORTLET, this );
+        model.put( MARK_SITE_PATH, AppPathService.getPortalUrl( ) );
+        model.put( MARK_CHILD_PAGES, getVisibleChildPages( request ) );
+        model.put( MARK_DEVICE_CLASS,
+                ( getDeviceDisplayFlags( ) & FLAG_DISPLAY_ON_SMALL_DEVICE ) != 0 ? "" : CLASS_HIDDEN_PHONE );
 
-        Collection<Page> pages;
-        if ( getParentPageId(  ) == 0 )
+        return AppTemplateService.getTemplate( TEMPLATE_PORTLET, request != null ? request.getLocale( ) : null, model )
+                .getHtml( );
+    }
+
+    /**
+     * Collects the child pages visible to the current user
+     *
+     * @param request the HTTP request
+     * @return the visible child pages, with their image URL when they have one
+     */
+    private List<ChildPageItem> getVisibleChildPages( HttpServletRequest request )
+    {
+        List<ChildPageItem> items = new ArrayList<>( );
+
+        if ( request == null )
         {
-            pages = PageHome.getChildPages( getPageId(  ) );
-        } else
-        {
-            pages = PageHome.getChildPages( getParentPageId(  ) );
+            return items;
         }
 
-        AdminPageJspBean adminPage = new AdminPageJspBean(  );
+        int nPageId = getParentPageId( ) == 0 ? getPageId( ) : getParentPageId( );
+        Collection<Page> pages = PageHome.getChildPages( nPageId );
+        AdminPageJspBean adminPage = new AdminPageJspBean( );
+
         for ( Page page : pages )
         {
-            if ( request != null )
+            if ( !page.isVisible( request ) )
             {
-	            if ( page.isVisible( request ) )
-	            {
-	                XmlUtil.beginElement( strXml, TAG_CHILD_PAGE );
-	                XmlUtil.addElement( strXml, TAG_CHILD_PAGE_ID, page.getId(  ) );
-	                XmlUtil.addElement( strXml, TAG_CHILD_PAGE_NAME, page.getName(  ) );
-	                XmlUtil.addElement( strXml, TAG_CHILD_PAGE_DESCRIPTION, page.getDescription(  ) );
-
-	                if ( page.getImageContent(  ) != null )
-	                {
-	                    int nImageLength = page.getImageContent(  ).length;
-	
-	                    if ( nImageLength >= 1 )
-	                    {
-	                        String strPageId = new Integer( page.getId(  ) ).toString(  );
-	                        XmlUtil.addElement( strXml, TAG_CHILD_PAGE_IMAGE,
-	                            adminPage.getResourceImagePage( page, strPageId ) );
-	                    }
-	                }
-	
-	                XmlUtil.endElement( strXml, TAG_CHILD_PAGE );
-	            }
+                continue;
             }
+
+            String strImageUrl = null;
+
+            if ( page.getImageContent( ) != null && page.getImageContent( ).length >= 1 )
+            {
+                strImageUrl = adminPage.getResourceImagePage( page, String.valueOf( page.getId( ) ) );
+            }
+
+            items.add( new ChildPageItem( page, strImageUrl ) );
         }
 
-        XmlUtil.endElement( strXml, TAG_CHILD_PAGES_PORTLET_LIST );
-
-        return addPortletTags( strXml );
+        return items;
     }
 
     /**
-     * Returns the Xml code of the ChildPage portlet with XML heading
-     *
-     * @param request The HTTP Servlet Request
-     * @return the Xml code of the ChildPage portlet
+     * Updates the current portlet instance
      */
-    public String getXmlDocument( HttpServletRequest request )
+    public void update( )
     {
-        return XmlUtil.getXmlHeader(  ) + getXml( request );
+        ChildPagesPortletHome.getInstance( ).update( this );
     }
 
     /**
-     * Updates the current instance of the ChildPage Portlet object
+     * Removes the current portlet instance
      */
-    public void update(  )
+    public void remove( )
     {
-        ChildPagesPortletHome.getInstance(  ).update( this );
+        ChildPagesPortletHome.getInstance( ).remove( this );
     }
 
     /**
-     * Removes the current instance of the ChildPage Portlet object
+     * A child page as the template consumes it
      */
-    public void remove(  )
+    public static final class ChildPageItem
     {
-        ChildPagesPortletHome.getInstance(  ).remove( this );
+        private final Page _page;
+        private final String _strImageUrl;
+
+        /**
+         * Builds an item
+         *
+         * @param page the page
+         * @param strImageUrl the image URL, null when the page has no image
+         */
+        ChildPageItem( Page page, String strImageUrl )
+        {
+            _page = page;
+            _strImageUrl = strImageUrl;
+        }
+
+        /**
+         * Returns the page identifier
+         *
+         * @return the page identifier
+         */
+        public int getId( )
+        {
+            return _page.getId( );
+        }
+
+        /**
+         * Returns the page name
+         *
+         * @return the page name
+         */
+        public String getName( )
+        {
+            return _page.getName( );
+        }
+
+        /**
+         * Returns the page description
+         *
+         * @return the page description
+         */
+        public String getDescription( )
+        {
+            return _page.getDescription( );
+        }
+
+        /**
+         * Returns the image URL
+         *
+         * @return the image URL, null when the page has no image
+         */
+        public String getImageUrl( )
+        {
+            return _strImageUrl;
+        }
     }
 }
