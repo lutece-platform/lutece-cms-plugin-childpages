@@ -39,8 +39,8 @@ import java.util.List;
 import fr.paris.lutece.portal.business.portlet.IPortletInterfaceDAO;
 import fr.paris.lutece.portal.business.portlet.PortletHome;
 import fr.paris.lutece.portal.business.portlet.PortletTypeHome;
-import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.util.ReferenceList;
+import jakarta.enterprise.inject.spi.CDI;
 
 
 /**
@@ -48,17 +48,14 @@ import fr.paris.lutece.util.ReferenceList;
  */
 public class ChildPagesPortletHome extends PortletHome
 {
-    // Static variable pointed at the DAO instance
-    private static IChildPagesPortletDAO _dao = (IChildPagesPortletDAO) SpringContextService.getPluginBean( "childpages",
-            "childPagesPortletDAO" );
+    private static IChildPagesPortletDAO _dao = CDI.current( ).select( IChildPagesPortletDAO.class ).get( );
 
-    /** This class implements the Singleton design pattern. */
     private static ChildPagesPortletHome _singleton = null;
 
     /**
-     * Constructor
+     * Builds the home instance
      */
-    public ChildPagesPortletHome(  )
+    public ChildPagesPortletHome( )
     {
         if ( _singleton == null )
         {
@@ -67,90 +64,90 @@ public class ChildPagesPortletHome extends PortletHome
     }
 
     /**
-     * Returns the identifier of the child pages portlet type
+     * Returns the child pages portlet type identifier
      *
      * @return the portlet type identifier
      */
-    public String getPortletTypeId(  )
+    public String getPortletTypeId( )
     {
-        String strCurrentClassName = this.getClass(  ).getName(  );
+        String strCurrentClassName = this.getClass( ).getName( );
         String strPortletTypeId = PortletTypeHome.getPortletTypeId( strCurrentClassName );
 
         return strPortletTypeId;
     }
 
     /**
-     * Returns the instance of ChildPagesPortletHome
+     * Returns the home instance
      *
-     * @return the ChildPagesPortletHome instance
+     * @return the home instance
      */
-    public static PortletHome getInstance(  )
+    public static PortletHome getInstance( )
     {
         if ( _singleton == null )
         {
-            _singleton = new ChildPagesPortletHome(  );
+            _singleton = new ChildPagesPortletHome( );
         }
 
         return _singleton;
     }
 
     /**
-     * Returns the instance of the ChildPagesPortletDAO singleton
+     * Returns the DAO instance
      *
-     * @return the instance of the ChildPagesPortletDAO
+     * @return the DAO instance
      */
-    public IPortletInterfaceDAO getDAO(  )
+    public IPortletInterfaceDAO getDAO( )
     {
         return _dao;
     }
 
     /**
-     * Returns the portlet parent page identifier of the portlet whose identifier is specified in parameter
+     * Returns the parent page identifier of a portlet
      *
-     * @param nPortletId the identifier of the portlet
-     * @return the identifier of the parent page portlet
+     * @param nPortletId the portlet identifier
+     * @return the parent page identifier
      */
     public static int getParentPageId( int nPortletId )
     {
         ChildPagesPortlet portlet = (ChildPagesPortlet) _dao.load( nPortletId );
 
-        return portlet.getParentPageId(  );
+        return portlet.getParentPageId( );
     }
 
     /**
-     * Returns the list of all the pages of the database
+     * Returns all the pages of the database
      *
-     * @return the list in form of a ReferenceList object
+     * @return the pages list
      */
-    public static ReferenceList getPagesList(  )
+    public static ReferenceList getPagesList( )
     {
-        return _dao.selectPagesList(  );
+        return _dao.selectPagesList( );
     }
 
     /**
-     * Returns the list of the child pages of a page whose identifier is specified in parameter
+     * Returns the child pages of a page
      *
-     * @param nPageId the identifier of the page
-     * @return the list in form of a ReferenceList object
+     * @param nPageId the page identifier
+     * @return the child pages list
      */
     public static ReferenceList getChildPagesList( int nPageId )
     {
         return _dao.selectChildPagesList( nPageId );
     }
-    
+
     /**
-     * Returns the list of ChildPages portlets whose parent page id is specified
-     * 
-     * @param parentPageId the parent page id
-     * @return list of ChildPages portlets whose parent page id is parentPageId
+     * Returns the portlets bound to a parent page
+     *
+     * @param parentPageId the parent page identifier
+     * @return the portlets list
      */
     public static List<ChildPagesPortlet> getChildPagesPortlets( int parentPageId )
     {
         List<ChildPagesPortlet> portlets = _dao.getChildPagesPortlets( parentPageId );
-        List<ChildPagesPortlet> res = new ArrayList<ChildPagesPortlet>( portlets.size( ) );
-        for ( ChildPagesPortlet aPortlet : portlets)
+        List<ChildPagesPortlet> res = new ArrayList<>( portlets.size( ) );
+        for ( ChildPagesPortlet aPortlet : portlets )
         {
-            res.add( ( ChildPagesPortlet ) findByPrimaryKey( aPortlet.getId( ) ) );
+            res.add( (ChildPagesPortlet) findByPrimaryKey( aPortlet.getId( ) ) );
         }
         return res;
     }

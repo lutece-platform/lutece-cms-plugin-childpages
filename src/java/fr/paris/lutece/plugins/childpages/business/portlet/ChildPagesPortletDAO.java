@@ -39,11 +39,13 @@ import java.util.List;
 import fr.paris.lutece.portal.business.portlet.Portlet;
 import fr.paris.lutece.util.ReferenceList;
 import fr.paris.lutece.util.sql.DAOUtil;
+import jakarta.enterprise.context.ApplicationScoped;
 
 
 /**
  * This class provides Data Access methods for ChildPagesPortlet objects
  */
+@ApplicationScoped
 public final class ChildPagesPortletDAO implements IChildPagesPortletDAO
 {
     private static final String SQL_QUERY_INSERT = "INSERT INTO childpages_portlet ( id_portlet, id_child_page ) VALUES ( ?,? )";
@@ -54,141 +56,148 @@ public final class ChildPagesPortletDAO implements IChildPagesPortletDAO
     private static final String SQL_QUERY_SELECT_PAGE_LIST = "SELECT id_page, name FROM core_page";
     private static final String SQL_QUERY_SELECT_BY_PARENTPAGEID = "SELECT id_portlet, id_child_page FROM childpages_portlet WHERE id_child_page = ?";
 
-    ////////////////////////////////////////////////////////////////////////////
-    //Access methods to data
-
     /**
-     * Insert a new record in the table childpages_portlet
+     * Inserts a new record in the table
      *
-     * @param portlet the instance of the Portlet object to insert
+     * @param portlet the portlet to insert
      */
     public void insert( Portlet portlet )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_INSERT );
-        ChildPagesPortlet p = (ChildPagesPortlet) portlet;
-        daoUtil.setInt( 1, p.getId(  ) );
-        daoUtil.setInt( 2, p.getParentPageId(  ) );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_INSERT ) )
+        {
+            ChildPagesPortlet p = (ChildPagesPortlet) portlet;
+            daoUtil.setInt( 1, p.getId( ) );
+            daoUtil.setInt( 2, p.getParentPageId( ) );
+            daoUtil.executeUpdate( );
+        }
     }
 
     /**
      * Deletes a record from the table
      *
-     * @param nPortletId Identifier portlet
+     * @param nPortletId the portlet identifier
      */
     public void delete( int nPortletId )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_DELETE );
-        daoUtil.setInt( 1, nPortletId );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_DELETE ) )
+        {
+            daoUtil.setInt( 1, nPortletId );
+            daoUtil.executeUpdate( );
+        }
     }
 
     /**
-     * Loads the data of a ChildPagesPortlet whose identifier is specified in parameter from the table
+     * Loads a portlet by identifier
      *
-     * @param nPortletId The ChildPagesPortlet identifier
-     * @return the ChildPagesPortlet object
+     * @param nPortletId the portlet identifier
+     * @return the loaded portlet
      */
     public Portlet load( int nPortletId )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT );
-        daoUtil.setInt( 1, nPortletId );
-        daoUtil.executeQuery(  );
-
-        ChildPagesPortlet portlet = new ChildPagesPortlet(  );
-
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT ) )
         {
-            portlet.setId( daoUtil.getInt( 1 ) );
-            portlet.setParentPageId( daoUtil.getInt( 2 ) );
+            daoUtil.setInt( 1, nPortletId );
+            daoUtil.executeQuery( );
+
+            ChildPagesPortlet portlet = new ChildPagesPortlet( );
+
+            if ( daoUtil.next( ) )
+            {
+                portlet.setId( daoUtil.getInt( 1 ) );
+                portlet.setParentPageId( daoUtil.getInt( 2 ) );
+            }
+
+            return portlet;
         }
-
-        daoUtil.free(  );
-
-        return portlet;
     }
 
     /**
-     * Updates a record in the table with the Portlet instance specified in parameter
-     * @param portlet the instance of Portlet class to be updated
+     * Updates a record in the table
+     *
+     * @param portlet the portlet to update
      */
     public void store( Portlet portlet )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_UPDATE );
-        ChildPagesPortlet p = (ChildPagesPortlet) portlet;
-        daoUtil.setInt( 1, p.getParentPageId(  ) );
-        daoUtil.setInt( 2, p.getId(  ) );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_UPDATE ) )
+        {
+            ChildPagesPortlet p = (ChildPagesPortlet) portlet;
+            daoUtil.setInt( 1, p.getParentPageId( ) );
+            daoUtil.setInt( 2, p.getId( ) );
+            daoUtil.executeUpdate( );
+        }
     }
 
     /**
-     * Load the list of the child pages of a page whose identifier is specified in parameter
+     * Loads the child pages of a page
      *
-     * @param nPageId the identifier of the page
-     * @return the list in form of a ReferenceList object
+     * @param nPageId the page identifier
+     * @return the child pages list
      */
     public ReferenceList selectChildPagesList( int nPageId )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_CHILDPAGE_LIST );
-        daoUtil.setInt( 1, nPageId );
-        daoUtil.executeQuery(  );
-
-        ReferenceList list = new ReferenceList(  );
-
-        while ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_CHILDPAGE_LIST ) )
         {
-            list.addItem( daoUtil.getInt( 1 ), daoUtil.getString( 2 ) );
+            daoUtil.setInt( 1, nPageId );
+            daoUtil.executeQuery( );
+
+            ReferenceList list = new ReferenceList( );
+
+            while ( daoUtil.next( ) )
+            {
+                list.addItem( daoUtil.getInt( 1 ), daoUtil.getString( 2 ) );
+            }
+
+            return list;
         }
-
-        daoUtil.free(  );
-
-        return list;
     }
 
     /**
-     * Load the list of all the pages of the database
+     * Loads all the pages of the database
      *
-     * @return the list in form of a ReferenceList object
+     * @return the pages list
      */
-    public ReferenceList selectPagesList(  )
+    public ReferenceList selectPagesList( )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_PAGE_LIST );
-        daoUtil.executeQuery(  );
-
-        ReferenceList list = new ReferenceList(  );
-
-        while ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_PAGE_LIST ) )
         {
-            list.addItem( daoUtil.getInt( 1 ), daoUtil.getString( 2 ) );
+            daoUtil.executeQuery( );
+
+            ReferenceList list = new ReferenceList( );
+
+            while ( daoUtil.next( ) )
+            {
+                list.addItem( daoUtil.getInt( 1 ), daoUtil.getString( 2 ) );
+            }
+
+            return list;
         }
-
-        daoUtil.free(  );
-
-        return list;
     }
 
+    /**
+     * Loads the portlets bound to a parent page
+     *
+     * @param parentPageId the parent page identifier
+     * @return the portlets list
+     */
     @Override
     public List<ChildPagesPortlet> getChildPagesPortlets( int parentPageId )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_BY_PARENTPAGEID );
-        daoUtil.setInt( 1, parentPageId );
-        daoUtil.executeQuery(  );
-
-        List<ChildPagesPortlet> res = new ArrayList<ChildPagesPortlet>( );
-
-        while ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_BY_PARENTPAGEID ) )
         {
-            ChildPagesPortlet portlet = new ChildPagesPortlet(  );
-            portlet.setId( daoUtil.getInt( 1 ) );
-            portlet.setParentPageId( daoUtil.getInt( 2 ) );
-            res.add( portlet );
+            daoUtil.setInt( 1, parentPageId );
+            daoUtil.executeQuery( );
+
+            List<ChildPagesPortlet> res = new ArrayList<>( );
+
+            while ( daoUtil.next( ) )
+            {
+                ChildPagesPortlet portlet = new ChildPagesPortlet( );
+                portlet.setId( daoUtil.getInt( 1 ) );
+                portlet.setParentPageId( daoUtil.getInt( 2 ) );
+                res.add( portlet );
+            }
+
+            return res;
         }
-
-        daoUtil.free(  );
-
-        return res;
     }
 }

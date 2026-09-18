@@ -1,0 +1,20 @@
+<div class="portlet-background ${device_class} append-bottom">
+	<#if portlet.displayPortletTitle != 1>
+		<div class="portlet-background-header -lutece-border-radius-top">${portlet.name}</div>
+		<div class="portlet-background-content -lutece-border-radius-bottom">
+	<#else>
+		<div class="portlet-background-content -lutece-border-radius">
+	</#if>
+		<ul>
+			<#list child_pages as child_page>
+				<li>
+					<#if child_page.imageUrl??>
+						<div class="img-polaroid span3"><img src="${child_page.imageUrl}" alt="${child_page.name}" /></div>
+					</#if>
+					<a href="${site_path}?page_id=${child_page.id}" target="_top"><b>${child_page.name}</b></a><br/>
+					${child_page.description!}<br/>
+				</li>
+			</#list>
+		</ul>
+		</div>
+</div>
