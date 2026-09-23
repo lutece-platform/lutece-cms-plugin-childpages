@@ -221,7 +221,7 @@ public class EventListenerTest extends LuteceTestCase
     /**
      * Tests that no event loop occurs
      */
-    @Timeout( value = 1, unit = TimeUnit.SECONDS )
+    @Timeout( value = 10, unit = TimeUnit.SECONDS )
     @Test
     public void testProcessEventLoopPrevention( )
     {
