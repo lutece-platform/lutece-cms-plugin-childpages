@@ -5,11 +5,11 @@
 -- Dumping data for table childpages_portlet
 --
 
-INSERT INTO childpages_portlet VALUES (83,1);
-INSERT INTO childpages_portlet VALUES (85,1);
-INSERT INTO childpages_portlet VALUES (87,3);
-INSERT INTO childpages_portlet VALUES (88,1);
-INSERT INTO childpages_portlet VALUES (89,1);
+INSERT INTO childpages_portlet (id_portlet, id_child_page) VALUES (83,1);
+INSERT INTO childpages_portlet (id_portlet, id_child_page) VALUES (85,1);
+INSERT INTO childpages_portlet (id_portlet, id_child_page) VALUES (87,3);
+INSERT INTO childpages_portlet (id_portlet, id_child_page) VALUES (88,1);
+INSERT INTO childpages_portlet (id_portlet, id_child_page) VALUES (89,1);
 
 
 --
@@ -21,3 +21,11 @@ INSERT INTO core_portlet (id_portlet, id_portlet_type, id_page, name, date_updat
 INSERT INTO core_portlet (id_portlet, id_portlet_type, id_page, name, date_update, status, portlet_order, column_no, id_style, accept_alias, date_creation, display_portlet_title) VALUES (88,'CHILDPAGES_PORTLET',10,'Pages filles','2007-11-24 17:20:37',0,1,5,301,0,'2007-11-24 17:20:37',1);
 INSERT INTO core_portlet (id_portlet, id_portlet_type, id_page, name, date_update, status, portlet_order, column_no, id_style, accept_alias, date_creation, display_portlet_title) VALUES (89,'CHILDPAGES_PORTLET',9,'Pages filles','2007-11-24 17:23:06',0,1,5,301,0,'2007-11-24 17:21:47',1);
 INSERT INTO core_portlet (id_portlet, id_portlet_type, id_page, name, date_update, status, portlet_order, column_no, id_style, accept_alias, date_creation, display_portlet_title) VALUES (83,'CHILDPAGES_PORTLET',1,'Pages filles','2007-11-24 16:11:33',0,1,5,300,0,'2007-11-24 16:11:33',1);
+
+--
+-- The sample portlets bound to the former "Image + lien" XSL style (301) use the matching FreeMarker template (6.0.0)
+--
+-- changeset childpages:init_core_childpages_data_sample.sql-rev1.sql
+-- preconditions onFail:MARK_RAN onError:WARN
+UPDATE core_portlet SET id_template = (SELECT MIN(id_template) FROM core_portlet_template WHERE id_portlet_type = 'CHILDPAGES_PORTLET' AND template_path = 'skin/plugins/childpages/portlet/childpages_portlet_image.html') WHERE id_portlet IN (88, 89);
+UPDATE core_portlet SET id_style = 0 WHERE id_portlet_type = 'CHILDPAGES_PORTLET';

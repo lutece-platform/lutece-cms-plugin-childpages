@@ -36,29 +36,26 @@ package fr.paris.lutece.plugins.childpages.business.portlet;
 import fr.paris.lutece.portal.business.page.Page;
 import fr.paris.lutece.portal.business.page.PageHome;
 import fr.paris.lutece.portal.business.portlet.PortletHtmlContent;
-import fr.paris.lutece.portal.service.template.AppTemplateService;
 import fr.paris.lutece.portal.service.util.AppPathService;
 import fr.paris.lutece.portal.web.admin.AdminPageJspBean;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * This class represents business objects ChildPagesPortlet
+ * This class represents business objects ChildPagesPortlet. The content is rendered with the FreeMarker template chosen for the portlet among the
+ * templates registered for the child pages portlet type in the core (Section Template Management feature).
  */
 public class ChildPagesPortlet extends PortletHtmlContent
 {
-    private static final String TEMPLATE_PORTLET = "skin/plugins/childpages/portlet/childpages_portlet.html";
-    private static final String MARK_PORTLET = "portlet";
+    private static final String TEMPLATE_PORTLET_DEFAULT = "skin/plugins/childpages/portlet/childpages_portlet.html";
+
     private static final String MARK_CHILD_PAGES = "child_pages";
     private static final String MARK_SITE_PATH = "site_path";
-    private static final String MARK_DEVICE_CLASS = "device_class";
-    private static final String CLASS_HIDDEN_PHONE = "hidden-phone";
 
     private int _nParentPageId;
 
@@ -73,7 +70,8 @@ public class ChildPagesPortlet extends PortletHtmlContent
     /**
      * Sets the parent page identifier
      *
-     * @param nParentPageId the parent page identifier
+     * @param nParentPageId
+     *            the parent page identifier
      */
     public void setParentPageId( int nParentPageId )
     {
@@ -91,29 +89,27 @@ public class ChildPagesPortlet extends PortletHtmlContent
     }
 
     /**
-     * Returns the HTML content of the portlet
+     * Returns the HTML content of the portlet, rendered with the template chosen for the portlet
      *
-     * @param request the HTTP request
+     * @param request
+     *            the HTTP request
      * @return the rendered portlet
      */
     @Override
     public String getHtmlContent( HttpServletRequest request )
     {
-        Map<String, Object> model = new HashMap<>( );
-        model.put( MARK_PORTLET, this );
+        Map<String, Object> model = createPortletModel( );
         model.put( MARK_SITE_PATH, AppPathService.getPortalUrl( ) );
         model.put( MARK_CHILD_PAGES, getVisibleChildPages( request ) );
-        model.put( MARK_DEVICE_CLASS,
-                ( getDeviceDisplayFlags( ) & FLAG_DISPLAY_ON_SMALL_DEVICE ) != 0 ? "" : CLASS_HIDDEN_PHONE );
 
-        return AppTemplateService.getTemplate( TEMPLATE_PORTLET, request != null ? request.getLocale( ) : null, model )
-                .getHtml( );
+        return renderTemplate( request, TEMPLATE_PORTLET_DEFAULT, model );
     }
 
     /**
      * Collects the child pages visible to the current user
      *
-     * @param request the HTTP request
+     * @param request
+     *            the HTTP request
      * @return the visible child pages, with their image URL when they have one
      */
     private List<ChildPageItem> getVisibleChildPages( HttpServletRequest request )
@@ -160,6 +156,7 @@ public class ChildPagesPortlet extends PortletHtmlContent
     /**
      * Removes the current portlet instance
      */
+    @Override
     public void remove( )
     {
         ChildPagesPortletHome.getInstance( ).remove( this );
@@ -176,8 +173,10 @@ public class ChildPagesPortlet extends PortletHtmlContent
         /**
          * Builds an item
          *
-         * @param page the page
-         * @param strImageUrl the image URL, null when the page has no image
+         * @param page
+         *            the page
+         * @param strImageUrl
+         *            the image URL, null when the page has no image
          */
         ChildPageItem( Page page, String strImageUrl )
         {
