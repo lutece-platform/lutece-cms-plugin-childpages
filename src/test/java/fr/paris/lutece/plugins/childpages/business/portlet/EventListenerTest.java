@@ -62,8 +62,8 @@ public class EventListenerTest extends LuteceTestCase
 {
     private static final String PORLET_NAME = "ChildPagesPortletTest";
     private static final int TEMPLATE_ONE_COLUMN = 2;
-    private static final String MARKER_PORTLET_START = "portlet-background";
-    private static final String MARKER_PORTLET_END = "</div>\n</div>";
+    private static final String MARKER_PORTLET_START = "portlet-childpages";
+    private static final String MARKER_PORTLET_END = "</section>";
 
     private int _nHostPageId;
 

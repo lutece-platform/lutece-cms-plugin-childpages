@@ -1,0 +1,22 @@
+<@cTpl>
+<@cSection class='portlet portlet-childpages portlet-childpages-image ${device_class!}' id='portlet_${portlet_id?c}'>
+<#if portlet_name??>
+	<@cTitle level=2 class='portlet-header'>${portlet_name}</@cTitle>
+</#if>
+	<@cBlock class='portlet-content'>
+	<#if child_pages?has_content>
+		<@cRow class='g-3'>
+		<#list child_pages as child_page>
+			<@cCol cols='12' class='col-sm-6 col-lg-3'>
+				<@cCard class='h-100' title=child_page.name titleLevel=3 titleUrl='${site_path}?page_id=${child_page.id?c}' img=child_page.imageUrl! imgAlt=child_page.name>
+					<#if child_page.description?has_content>
+					<@cText class='card-text mb-0'>${child_page.description}</@cText>
+					</#if>
+				</@cCard>
+			</@cCol>
+		</#list>
+		</@cRow>
+	</#if>
+	</@cBlock>
+</@cSection>
+</@cTpl>

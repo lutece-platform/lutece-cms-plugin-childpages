@@ -1,7 +1,7 @@
 <@cTpl>
-<@cSection class='portlet portlet-childpages ${device_class!}' id='portlet_${portlet_id?c}'>
+<@cSection class='portlet portlet-childpages portlet-childpages-boxed border rounded p-3 mb-3 ${device_class!}' id='portlet_${portlet_id?c}'>
 <#if portlet_name??>
-	<@cTitle level=2 class='portlet-header'>${portlet_name}</@cTitle>
+	<@cTitle level=2 class='portlet-header h4 border-bottom pb-2'>${portlet_name}</@cTitle>
 </#if>
 	<@cBlock class='portlet-content'>
 	<#if child_pages?has_content>
@@ -10,7 +10,7 @@
 			<li class="mb-2">
 				<@cLink href='${site_path}?page_id=${child_page.id?c}' label=child_page.name class='fw-bold' target='_top' />
 				<#if child_page.description?has_content>
-				<@cText class='mb-0'>${child_page.description}</@cText>
+				<@cText class='mb-0 text-muted'>${child_page.description}</@cText>
 				</#if>
 			</li>
 		</#list>

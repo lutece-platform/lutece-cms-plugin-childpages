@@ -48,7 +48,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public final class ChildPagesPortletDAO implements IChildPagesPortletDAO
 {
-    private static final String SQL_QUERY_INSERT = "INSERT INTO childpages_portlet ( id_portlet, id_child_page ) VALUES ( ?,? )";
+    private static final String SQL_QUERY_INSERT = "INSERT INTO childpages_portlet ( id_portlet, id_child_page ) VALUES ( ?, ? )";
     private static final String SQL_QUERY_DELETE = "DELETE FROM childpages_portlet WHERE id_portlet = ?";
     private static final String SQL_QUERY_SELECT = "SELECT id_portlet, id_child_page FROM childpages_portlet WHERE id_portlet = ?";
     private static final String SQL_QUERY_UPDATE = "UPDATE childpages_portlet SET id_child_page = ? WHERE id_portlet = ?";
