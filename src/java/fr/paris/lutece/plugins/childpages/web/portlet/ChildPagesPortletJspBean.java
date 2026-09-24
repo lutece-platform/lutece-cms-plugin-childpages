@@ -275,6 +275,14 @@ public class ChildPagesPortletJspBean extends PortletJspBean
      * @param request the HTTP request
      * @return the portlet, null when the identifier is missing, malformed or unknown
      */
+
+    /**
+     * Finds the child pages portlet designated by the request
+     *
+     * @param request
+     *            the HTTP request
+     * @return the portlet, null when it is unknown or of another type
+     */
     private ChildPagesPortlet findPortlet( HttpServletRequest request )
     {
         String strIdPortlet = request.getParameter( PARAMETER_PORTLET_ID );

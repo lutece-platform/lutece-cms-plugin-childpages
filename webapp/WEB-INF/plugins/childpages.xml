@@ -11,7 +11,7 @@
     <description>childpages.plugin.description</description>
     <provider>childpages.plugin.provider</provider>
     <provider-url>http://lutece.paris.fr</provider-url>
-    <icon-url>images/admin/skin/plugins/childpages/childpages.png</icon-url>
+    <icon-url>themes/admin/shared/plugins/childpages/images/childpages.svg</icon-url>
     <copyright>Copyright 2001-2009 Mairie de Paris</copyright>
 	<core-version-dependency>
 		<min-core-version>8.0.0</min-core-version>
@@ -20,6 +20,8 @@
     
     <!-- if the plugin must have a connection pool with parameter : 1 - yes, 0 - no -->	
     <db-pool-required>0</db-pool-required>
+
+
     
 
   <!-- Portlet parameters -->
