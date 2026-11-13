@@ -47,6 +47,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import fr.paris.lutece.portal.business.page.Page;
+import fr.paris.lutece.portal.business.page.PageHome;
 import fr.paris.lutece.portal.business.portlet.Portlet;
 import fr.paris.lutece.portal.business.portlet.PortletTemplate;
 import fr.paris.lutece.portal.business.portlet.PortletTemplateHome;
@@ -151,6 +152,33 @@ public class ChildPagesPortletRenderingTest extends LuteceTestCase
             assertTrue( strContent.contains( _strChildPageName + "_desc" ), "template " + template.getTemplatePath( ) + " should render the child page description" );
             assertTrue( strContent.contains( "page_id=" + _nChildPageId ), "template " + template.getTemplatePath( ) + " should link to the child page" );
             assertTrue( strContent.contains( "d-none d-md-block" ), "template " + template.getTemplatePath( ) + " should hide the portlet on small devices" );
+        }
+    }
+
+    /**
+     * The name and the description of a child page are plain text: every shipped template writes them escaped
+     */
+    @Test
+    public void testChildPageTextIsEscaped( )
+    {
+        MockHttpServletRequest request = new MockHttpServletRequest( );
+        LocalVariables.setLocal( null, request, new MockHttpServletResponse( ) );
+
+        Page childPage = PageHome.findByPrimaryKey( _nChildPageId );
+        childPage.setName( "<b>" + _strChildPageName + "</b>" );
+        childPage.setDescription( "<i>" + _strChildPageName + "_desc</i>" );
+        _pageService.updatePage( childPage );
+
+        for ( PortletTemplate template : PortletTemplateHome.findByPortletType( ChildPagesPortletHome.getInstance( ).getPortletTypeId( ) ) )
+        {
+            _portlet.setIdTemplate( template.getId( ) );
+            String strContent = _portlet.getHtmlContent( request );
+
+            assertTrue( strContent.contains( "&lt;b&gt;" + _strChildPageName ), "template " + template.getTemplatePath( ) + " should escape the child page name" );
+            assertTrue( strContent.contains( "&lt;i&gt;" + _strChildPageName + "_desc" ),
+                    "template " + template.getTemplatePath( ) + " should escape the child page description" );
+            assertFalse( strContent.contains( "<b>" + _strChildPageName ), "template " + template.getTemplatePath( ) + " should not write the name as HTML" );
+            assertFalse( strContent.contains( "<i>" + _strChildPageName ), "template " + template.getTemplatePath( ) + " should not write the description as HTML" );
         }
     }
 
